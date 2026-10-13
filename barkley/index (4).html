@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="공개된 감사결과를 업무 키워드로 찾아보고 유사 지적사례를 미리 확인하는 군포시 감사사례 통합검색 시범판">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>감사사례 연찬 도우미</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">본문 바로가기</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <p class="eyebrow">군포시 감사사례 통합검색 · 시범판</p>
+        <h1><a href="./" class="home-link">감사사례 연찬 도우미</a></h1>
+      </div>
+      <dl class="stats" aria-label="수록 현황">
+        <div><dt>감사사례</dt><dd id="statCases">–</dd></div>
+        <div><dt>감사자료원</dt><dd id="statSources">–</dd></div>
+        <div><dt>데이터 기준</dt><dd id="statUpdated">–</dd></div>
+      </dl>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="search-block" aria-label="검색">
+      <form id="searchForm" class="search-form" role="search" autocomplete="off">
+        <label for="searchInput" class="sr-only">업무 키워드</label>
+        <input id="searchInput" type="search" name="q" placeholder="업무 키워드를 입력하세요 (예: 계약, 보조금, 출장)" maxlength="60">
+        <button type="submit" class="btn-primary">검색</button>
+      </form>
+      <div class="quick" aria-label="추천 키워드">
+        <span class="quick-label">추천</span>
+        <button type="button" data-query="계약">계약</button>
+        <button type="button" data-query="보조금">보조금</button>
+        <button type="button" data-query="출장">출장</button>
+        <button type="button" data-query="채용">채용</button>
+        <button type="button" data-query="공유재산">공유재산</button>
+        <button type="button" data-query="민간위탁">민간위탁</button>
+        <button type="button" data-query="복무">복무</button>
+        <button type="button" id="resetBtn" class="link-btn">전체 초기화</button>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist" aria-label="화면 선택">
+      <button type="button" class="tab is-active" role="tab" id="tab-cases" aria-controls="caseView" aria-selected="true" data-tab="cases">감사사례 <span class="count" id="caseTabCount">0</span></button>
+      <button type="button" class="tab" role="tab" id="tab-sources" aria-controls="sourceView" aria-selected="false" data-tab="sources">감사자료원 <span class="count" id="sourceTabCount">0</span></button>
+      <button type="button" class="tab" role="tab" id="tab-guide" aria-controls="guideView" aria-selected="false" data-tab="guide">이용안내</button>
+    </nav>
+
+    <!-- 감사사례 -->
+    <section id="caseView" role="tabpanel" aria-labelledby="tab-cases">
+      <div class="filters" aria-label="결과 좁히기">
+        <label><span>업무분야</span><select id="categoryFilter"></select></label>
+        <label><span>감사기관</span><select id="orgFilter"></select></label>
+        <label><span>감사연도</span><select id="yearFilter"></select></label>
+        <label><span>감사유형</span><select id="typeFilter"></select></label>
+        <label><span>처분유형</span><select id="dispositionFilter"></select></label>
+        <label><span>검토상태</span><select id="reviewFilter"></select></label>
+        <label><span>정렬</span>
+          <select id="sortSelect">
+            <option value="relevance">관련도순</option>
+            <option value="latest">최신순</option>
+            <option value="category">업무분야순</option>
+          </select>
+        </label>
+        <button type="button" id="filterReset" class="link-btn">필터 초기화</button>
+      </div>
+      <div class="result-head">
+        <p id="resultSummary" class="result-summary" aria-live="polite"></p>
+        <p id="expansionNotice" class="notice"></p>
+      </div>
+      <div id="dataNotice" class="data-notice" hidden></div>
+      <div id="results" class="list"></div>
+    </section>
+
+    <!-- 감사자료원 -->
+    <section id="sourceView" role="tabpanel" aria-labelledby="tab-sources" hidden>
+      <div class="filters" aria-label="자료원 좁히기">
+        <label><span>구분</span><select id="groupFilter"></select></label>
+        <label><span>수집준비도</span><select id="readinessFilter"></select></label>
+        <label class="check"><input type="checkbox" id="priorityOnly"> <span>연찬 우선기관만</span></label>
+        <button type="button" id="sourceFilterReset" class="link-btn">필터 초기화</button>
+      </div>
+      <div class="result-head">
+        <p id="sourceSummary" class="result-summary" aria-live="polite"></p>
+      </div>
+      <div id="sourceResults" class="list"></div>
+    </section>
+
+    <!-- 이용안내 -->
+    <section id="guideView" role="tabpanel" aria-labelledby="tab-guide" hidden>
+      <div class="guide">
+        <article>
+          <h2>이렇게 찾아보세요</h2>
+          <ol>
+            <li>담당 업무 용어를 입력합니다. 예: <b>계약</b>, <b>보조금</b>, <b>출장</b>, <b>채용</b>, <b>공유재산</b>.</li>
+            <li>입력한 단어가 그대로 들어간 사례가 먼저 나오고, 관련 표현(예: 계약 → 수의계약, 변경계약, 이행보증)으로 찾은 사례가 뒤에 나옵니다.</li>
+            <li>여러 단어를 띄어 쓰면 모든 단어가 들어간 사례만 보여줍니다. 예: <b>계약 보증</b>.</li>
+            <li>업무분야·기관·연도·감사유형·처분유형으로 결과를 좁힐 수 있습니다.</li>
+            <li>찾는 사례가 없으면 <b>감사자료원</b> 탭에서 해당 기관의 공식 감사결과 목록으로 이동해 직접 확인하세요.</li>
+          </ol>
+        </article>
+        <article>
+          <h2>검토상태 표시</h2>
+          <dl class="defs" id="reviewDefs"></dl>
+          <p class="muted">검토대기 사례는 감사실 검토가 끝난 뒤 이 화면에 추가됩니다.</p>
+        </article>
+        <article>
+          <h2>꼭 확인하세요</h2>
+          <ul>
+            <li>이 화면은 업무 연찬용 참고자료입니다. 감사·처분 판단은 반드시 공식 원문, 관계 법령, 개별 사실관계를 확인해서 하세요.</li>
+            <li>요약과 처분내용은 공개된 원문에 있는 내용만 옮겼습니다. 원문에 없는 법령은 ‘원문에서 확인’으로 표시합니다.</li>
+            <li>‘공식 게시판 보기’로 표시된 사례는 게시판 목록으로 연결됩니다. 안내된 게시물을 목록에서 선택하세요.</li>
+          </ul>
+        </article>
+        <article>
+          <h2>보안 원칙</h2>
+          <ul>
+            <li>파일 업로드, 첨부파일 자동 다운로드, 외부 AI 연결 기능이 없습니다.</li>
+            <li>검색은 이 화면 안에서만 처리되며 입력한 검색어는 어디에도 저장·전송되지 않습니다.</li>
+            <li>공개된 감사자료만 수록합니다. 개인정보, 진행 중 조사자료, 비공개 감사자료는 수록하지 않습니다.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>공개 감사자료 기반 시범판 · 출처는 각 사례의 공식 게시물에서 확인하세요.</p>
+      <p id="footerMeta" class="muted"></p>
+    </div>
+  </footer>
+
+  <!-- 데이터: 파일마다 따로 읽으므로 하나가 실패해도 나머지는 동작합니다 -->
+  <script src="data/audit_cases.js"></script>
+  <script src="data/sources.js"></script>
+  <script src="data/synonyms.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
