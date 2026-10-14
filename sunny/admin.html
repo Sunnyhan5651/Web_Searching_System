@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 · 감사사례 연찬 도우미</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 관리자 헤더 -->
+<header class="admin-header">
+  <div class="inner">
+    <div style="display:flex;align-items:center;gap:8px">
+      <h1>감사사례 연찬 도우미</h1>
+      <span class="admin-badge">관리자</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px" id="headerRight">
+      <span class="admin-user" id="adminUserLabel"></span>
+      <button class="btn-logout" id="btnLogout" style="display:none">로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<!-- ====== 로그인 화면 ====== -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <h2>관리자 로그인</h2>
+    <p>감사사례 관리 권한이 있는 담당자만 접근할 수 있습니다.</p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="inputId">아이디</label>
+        <input type="text" id="inputId" autocomplete="username" placeholder="아이디 입력">
+      </div>
+      <div class="form-group">
+        <label for="inputPw">비밀번호</label>
+        <input type="password" id="inputPw" autocomplete="current-password" placeholder="비밀번호 입력">
+      </div>
+      <p class="login-error" id="loginError" aria-live="polite"></p>
+      <button type="submit" class="btn-primary full" style="margin-top:8px">로그인</button>
+    </form>
+    <p style="font-size:0.75rem;color:var(--gray-4);margin-top:14px;text-align:center">
+      ← <a href="index.html" style="color:var(--blue)">검색 화면으로 돌아가기</a>
+    </p>
+  </div>
+</div>
+
+<!-- ====== 관리자 메인 ====== -->
+<div id="adminPage" style="display:none">
+  <main class="admin-main">
+
+    <!-- 통계 -->
+    <div class="stat-cards" id="statCards"></div>
+
+    <!-- 탭 -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" data-atab="cases">감사사례 관리</button>
+      <button class="admin-tab-btn"        data-atab="sources">자료원 관리</button>
+      <button class="admin-tab-btn"        data-atab="export">내보내기</button>
+    </div>
+
+    <!-- 감사사례 탭 -->
+    <div id="atab-cases" class="atab-content active">
+      <div class="admin-toolbar">
+        <h2>감사사례 목록 (<span id="caseTableCount">0</span>건)</h2>
+        <div class="toolbar-right">
+          <button class="btn-secondary" id="btnImportCases">JSON 불러오기</button>
+          <button class="btn-primary"   id="btnAddCase">+ 사례 추가</button>
+        </div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="caseTable">
+          <thead>
+            <tr>
+              <th style="width:60px">ID</th>
+              <th>지적 제목</th>
+              <th>업무분야</th>
+              <th>감사기관</th>
+              <th style="width:50px">연도</th>
+              <th>검토상태</th>
+              <th style="width:100px">작업</th>
+            </tr>
+          </thead>
+          <tbody id="caseTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 자료원 탭 -->
+    <div id="atab-sources" class="atab-content" style="display:none">
+      <div class="admin-toolbar">
+        <h2>감사자료원 목록 (<span id="sourceTableCount">0</span>개)</h2>
+        <div class="toolbar-right">
+          <button class="btn-secondary" id="btnImportSources">JSON 불러오기</button>
+          <button class="btn-primary"   id="btnAddSource">+ 자료원 추가</button>
+        </div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="sourceTable">
+          <thead>
+            <tr>
+              <th>기관명</th>
+              <th>구분</th>
+              <th>연찬 우선순위</th>
+              <th>수집 준비도</th>
+              <th style="width:100px">작업</th>
+            </tr>
+          </thead>
+          <tbody id="sourceTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 내보내기 탭 -->
+    <div id="atab-export" class="atab-content" style="display:none">
+      <div style="background:white;border-radius:var(--radius);padding:24px;border:1px solid var(--gray-2);max-width:560px">
+        <h2 style="font-size:0.95rem;margin-bottom:14px">데이터 내보내기</h2>
+        <p style="font-size:0.83rem;color:var(--text-sub);margin-bottom:20px;line-height:1.6">
+          아래 버튼으로 수정한 데이터를 JSON 파일로 저장하세요.<br>
+          저장된 파일을 <code style="background:var(--gray-1);padding:1px 6px;border-radius:4px">data/</code> 폴더에 넣고 GitHub에 push하면 사이트에 반영됩니다.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px;max-width:320px">
+          <button class="btn-success" id="btnExportCases">audit_cases.json 다운로드</button>
+          <button class="btn-success" id="btnExportSources">sources.json 다운로드</button>
+        </div>
+        <div style="margin-top:20px;padding:12px;background:var(--gray-1);border-radius:6px;font-size:0.78rem;color:var(--gray-5)">
+          <strong>배포 순서</strong><br>
+          1. 위 버튼으로 JSON 파일 다운로드<br>
+          2. 레포지토리의 <code>sunny/data/</code> 폴더에 파일 교체<br>
+          3. GitHub에 commit &amp; push → 사이트 자동 반영
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ====== 감사사례 추가/수정 모달 ====== -->
+<div class="modal-overlay" id="caseModal" role="dialog" aria-modal="true" aria-labelledby="caseModalTitle">
+  <div class="modal">
+    <h3 id="caseModalTitle">감사사례 추가</h3>
+    <form id="caseForm">
+      <input type="hidden" id="caseEditId">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fAuditOrg">감사기관 *</label>
+          <input type="text" id="fAuditOrg" required placeholder="예: 감사원">
+        </div>
+        <div class="form-group">
+          <label for="fTargetOrg">감사대상기관</label>
+          <input type="text" id="fTargetOrg" placeholder="예: 고양시">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fAuditYear">감사연도 *</label>
+          <input type="number" id="fAuditYear" required placeholder="예: 2025" min="2000" max="2099">
+        </div>
+        <div class="form-group">
+          <label for="fAuditName">감사명 *</label>
+          <input type="text" id="fAuditName" required placeholder="예: 고양시 정기감사">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fCategory">업무분야 *</label>
+          <select id="fCategory" required>
+            <option value="">선택</option>
+            <option>계약</option>
+            <option>보조금</option>
+            <option>출장·복무</option>
+            <option>민간위탁</option>
+            <option>채용·인사</option>
+            <option>공유재산</option>
+            <option>재무·회계</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fDisposition">처분유형</label>
+          <select id="fDisposition">
+            <option value="">선택</option>
+            <option>주의</option>
+            <option>시정</option>
+            <option>통보</option>
+            <option>통보·주의</option>
+            <option>시정·주의</option>
+            <option>징계요구</option>
+            <option>변상명령</option>
+            <option>기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="fTitle">지적 제목 *</label>
+        <input type="text" id="fTitle" required placeholder="원문의 지적사항 제목 그대로 입력">
+      </div>
+      <div class="form-group">
+        <label for="fSummary">요약</label>
+        <textarea id="fSummary" placeholder="원문에 근거한 지적 내용 요약 (원문에 없는 내용 추가 금지)"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="fLegalBasis">관련근거</label>
+        <input type="text" id="fLegalBasis" placeholder="원문에 명시된 법령만 입력 (예: 지방계약법 제9조)">
+      </div>
+      <div class="form-group">
+        <label for="fSourceUrl">공식 게시물 URL *</label>
+        <input type="url" id="fSourceUrl" required placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label for="fReviewStatus">검토상태 *</label>
+        <select id="fReviewStatus" required>
+          <option value="needs_review">검토대기</option>
+          <option value="source_checked">출처확인</option>
+          <option value="approved">승인</option>
+        </select>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="btnCaseModalCancel">취소</button>
+      <button class="btn-primary"   id="btnCaseModalSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 자료원 추가/수정 모달 ====== -->
+<div class="modal-overlay" id="sourceModal" role="dialog" aria-modal="true" aria-labelledby="sourceModalTitle">
+  <div class="modal">
+    <h3 id="sourceModalTitle">자료원 추가</h3>
+    <form id="sourceForm">
+      <input type="hidden" id="sourceEditId">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sfAuditOrg">기관명 *</label>
+          <input type="text" id="sfAuditOrg" required placeholder="예: 감사원">
+        </div>
+        <div class="form-group">
+          <label for="sfGroup">구분</label>
+          <select id="sfGroup">
+            <option>중앙</option>
+            <option>광역</option>
+            <option>기초</option>
+            <option>공공기관</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="sfSourceUrl">공식 목록 URL *</label>
+        <input type="url" id="sfSourceUrl" required placeholder="https://...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sfPriority">연찬 우선순위</label>
+          <select id="sfPriority">
+            <option>최우선</option>
+            <option>높음</option>
+            <option>보통</option>
+            <option>낮음</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sfReadiness">수집 준비도</label>
+          <select id="sfReadiness">
+            <option value="ready">수집 가능</option>
+            <option value="manual">수동 등록</option>
+            <option value="pending">확인 필요</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="sfKeywords">추천 검색어 (쉼표 구분)</label>
+        <input type="text" id="sfKeywords" placeholder="예: 계약, 보조금, 인사">
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="btnSourceModalCancel">취소</button>
+      <button class="btn-primary"   id="btnSourceModalSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 숨겨진 파일 입력 -->
+<input type="file" id="importFileCases"   accept=".json" style="display:none">
+<input type="file" id="importFileSources" accept=".json" style="display:none">
+
+<!-- 토스트 알림 -->
+<div class="toast" id="toast" aria-live="assertive"></div>
+
+<script src="search.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

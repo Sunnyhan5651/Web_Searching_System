@@ -1,0 +1,82 @@
+[
+  {
+    "id": "src-bai",
+    "audit_org": "감사원",
+    "source_url": "https://www.bai.go.kr/bai/result/auditResult/list.do",
+    "source_group": "중앙",
+    "learning_priority": "최우선",
+    "collection_readiness": "ready",
+    "recommended_keywords": ["계약", "보조금", "복무", "채용", "공유재산"],
+    "checked_at": "2026-10-13"
+  },
+  {
+    "id": "src-seoul",
+    "audit_org": "서울특별시 감사위원회",
+    "source_url": "https://audit.seoul.go.kr/",
+    "source_group": "광역",
+    "learning_priority": "최우선",
+    "collection_readiness": "ready",
+    "recommended_keywords": ["계약", "보조금", "민간위탁", "채용"],
+    "checked_at": "2026-10-13"
+  },
+  {
+    "id": "src-sdm",
+    "audit_org": "서대문구",
+    "source_url": "https://www.sdm.go.kr/",
+    "source_group": "기초",
+    "learning_priority": "최우선",
+    "collection_readiness": "ready",
+    "recommended_keywords": ["계약", "공유재산", "출장"],
+    "checked_at": "2026-10-13"
+  },
+  {
+    "id": "src-gyeonggi",
+    "audit_org": "경기도 감사위원회",
+    "source_url": "https://audit.gg.go.kr/",
+    "source_group": "광역",
+    "learning_priority": "최우선",
+    "collection_readiness": "pending",
+    "recommended_keywords": ["계약", "보조금", "민간위탁"],
+    "checked_at": "2026-10-13"
+  },
+  {
+    "id": "src-gunpo",
+    "audit_org": "군포시",
+    "source_url": "https://www.gunpo.go.kr/",
+    "source_group": "기초",
+    "learning_priority": "최우선",
+    "collection_readiness": "pending",
+    "recommended_keywords": ["계약", "보조금", "채용", "공유재산"],
+    "checked_at": "2026-10-13"
+  },
+  {
+    "id": "src-acrc",
+    "audit_org": "국민권익위원회 공공감사정보시스템",
+    "source_url": "https://www.acrc.go.kr/",
+    "source_group": "중앙",
+    "learning_priority": "높음",
+    "collection_readiness": "manual",
+    "recommended_keywords": ["계약", "보조금", "비위", "복무"],
+    "checked_at": "2026-10-13"
+  },
+  {
+    "id": "src-busan",
+    "audit_org": "부산광역시 감사위원회",
+    "source_url": "https://audit.busan.go.kr/",
+    "source_group": "광역",
+    "learning_priority": "보통",
+    "collection_readiness": "pending",
+    "recommended_keywords": ["계약", "보조금"],
+    "checked_at": "2026-10-13"
+  },
+  {
+    "id": "src-incheon",
+    "audit_org": "인천광역시 감사위원회",
+    "source_url": "https://audit.incheon.go.kr/",
+    "source_group": "광역",
+    "learning_priority": "보통",
+    "collection_readiness": "pending",
+    "recommended_keywords": ["계약", "공유재산"],
+    "checked_at": "2026-10-13"
+  }
+]
