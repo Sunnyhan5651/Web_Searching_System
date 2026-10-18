@@ -158,7 +158,7 @@
     } else notice.hidden = true;
 
     var res = S.searchCases(state.cases, state.query, state.dict, { filters: caseFilters(), sort: $('sortSelect').value });
-    var rows = res.rows, terms = S.highlightTerms(res.parsed);
+    var rows = res.rows;
 
     var label = state.query ? '‘' + state.query + '’ 관련 ' : (anyCaseFilter() ? '조건에 맞는 감사사례 ' : '전체 감사사례 ');
     $('resultSummary').textContent = label + rows.length + '건';
@@ -171,10 +171,11 @@
         '비슷하지 않은 사례를 억지로 보여주지 않습니다. 필터를 초기화하거나 ‘감사자료원’ 탭에서 관련 기관의 공식 공개자료를 찾아보세요.');
       return;
     }
-    box.innerHTML = rows.map(function (r) { return caseHtml(r, terms); }).join('');
+    box.innerHTML = rows.map(function (r) { return caseHtml(r, res.parsed); }).join('');
   }
 
-  function caseHtml(r, terms) {
+  function caseHtml(r, parsed) {
+    var terms = S.highlightTerms(parsed, r);
     var x = r.item;
     var st = x.review_status;
     var why = '';
@@ -239,13 +240,14 @@
       return;
     }
     var res = S.searchSources(state.sources, state.query, state.dict, { filters: sourceFilters() });
-    var rows = res.rows, terms = S.highlightTerms(res.parsed);
+    var rows = res.rows;
     $('sourceSummary').textContent = (state.query ? '‘' + state.query + '’ 관련 자료원 ' : '감사자료원 ') + rows.length + '개';
     if (!rows.length) {
       box.innerHTML = emptyHtml('해당 자료원이 없습니다.', '기관명이나 지역명으로 다시 검색해 보세요.');
       return;
     }
     box.innerHTML = rows.map(function (r) {
+      var terms = S.highlightTerms(res.parsed, r);
       var s = r.item;
       var pr = s.learning_priority_member ? '<span class="tag strong">연찬 우선 ' + esc(s.learning_priority_order) + '위</span>' : '';
       return '' +

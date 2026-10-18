@@ -17,9 +17,11 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
+  /* 카드에 텍스트로 표시되는 필드만 검색합니다.
+     category/audit_type 은 태그·필터 메타데이터이므로 제외 → 드롭다운 필터로만 좁힘 */
   var CASE_FIELDS = [
-    ['title', 14], ['summary', 8], ['category', 7], ['legal_basis', 4],
-    ['audit_name', 4], ['audit_org', 3], ['target_org', 3], ['audit_type', 2], ['disposition', 2]
+    ['title', 14], ['summary', 8], ['legal_basis', 4],
+    ['audit_name', 4], ['audit_org', 3], ['target_org', 3], ['disposition', 2]
   ];
   var SOURCE_FIELDS = [
     ['audit_org', 10], ['recommended_keywords', 5], ['menu_name', 3], ['characteristics', 3],
@@ -219,9 +221,12 @@
     return out;
   }
 
-  function highlightTerms(parsed) {
-    var t = [];
-    parsed.tokens.forEach(function (tok) { t.push(tok.text); t = t.concat(tok.synonyms); });
+  /* 하이라이트 대상: 검색어 직접어 + 실제 매칭된 유의어만 포함
+     (매칭되지 않은 유의어까지 강조하면 엉뚱한 단어가 밑줄 표시됨)
+     row = searchCases/searchSources 반환값의 rows[i] */
+  function highlightTerms(parsed, row) {
+    var t = parsed.tokens.map(function (tok) { return tok.text; });
+    if (row) t = t.concat(row.synonyms || []);
     return t;
   }
 
