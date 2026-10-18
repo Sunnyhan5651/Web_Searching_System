@@ -38,6 +38,7 @@ SHEET_NAME  = "검토상태표"
 OUTPUT_DIRS = [
     HERE / "barkley" / "깃허브_업로드용_v2.2 (1)" / "data",
     HERE / "barkley-test" / "data",
+    HERE / "docs" / "data",
 ]
 
 PUBLIC_STATUSES = {"approved", "source_checked"}
