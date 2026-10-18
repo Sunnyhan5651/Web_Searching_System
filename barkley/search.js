@@ -48,12 +48,22 @@
   /* 유의어 사전 준비 */
   function createDictionary(synonymData) {
     var dict = { triggers: {}, blocked: {} };
-    if (!synonymData || !synonymData.groups) return dict;
+    if (!synonymData) return dict;
     (synonymData.blocked_generic_terms || []).forEach(function (t) { dict.blocked[compact(t)] = true; });
-    Object.keys(synonymData.groups).forEach(function (key) {
-      var g = synonymData.groups[key] || {};
-      var terms = (g.terms || []).filter(function (t) { return !dict.blocked[compact(t)]; });
-      var triggers = [key].concat(g.triggers || []);
+    // .groups 형식(레거시)과 .categories 형식(현행 synonyms.json) 모두 지원
+    var groups = synonymData.groups || synonymData.categories;
+    if (!groups) return dict;
+    Object.keys(groups).forEach(function (key) {
+      var g = groups[key] || {};
+      // .groups → g.terms / .categories → g.seed_terms 또는 g.related
+      var terms = (g.terms || g.seed_terms || g.related || [])
+        .filter(function (t) { return !dict.blocked[compact(t)]; });
+      // 명시적 트리거 + 키 자체 + "계약·회계" 같은 복합 키 분리
+      var triggers = (g.triggers || []).concat([key]);
+      key.split(/[·\/]/).forEach(function (part) {
+        part = part.trim();
+        if (part && triggers.indexOf(part) === -1) triggers.push(part);
+      });
       triggers.forEach(function (tr) {
         var k = compact(tr);
         if (!k) return;
@@ -75,7 +85,8 @@
     var tokens = [];
     words.forEach(function (w) {
       var c = compact(w);
-      if (!c || seen[c]) return;
+      // 한 음절짜리 토큰('외', '이', '가' 등)은 거의 모든 문서에 등장해 오검색을 유발
+      if (!c || c.length < 2 || seen[c]) return;
       seen[c] = true;
       var syn = [];
       var list = (dict && dict.triggers[c]) || [];
