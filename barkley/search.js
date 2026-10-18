@@ -17,10 +17,10 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  /* 카드에 텍스트로 표시되는 필드만 검색합니다.
-     category/audit_type 은 태그·필터 메타데이터이므로 제외 → 드롭다운 필터로만 좁힘 */
+  /* 카드에 표시되는 요소만 검색합니다 (태그·배지 포함).
+     audit_type 은 샘플 데이터에 없어 제외. legal_basis 는 법령명 쿼리일 때만 비교. */
   var CASE_FIELDS = [
-    ['title', 14], ['summary', 8], ['legal_basis', 4],
+    ['title', 14], ['summary', 8], ['category', 7], ['legal_basis', 4],
     ['audit_name', 4], ['audit_org', 3], ['target_org', 3], ['disposition', 2]
   ];
   var SOURCE_FIELDS = [
