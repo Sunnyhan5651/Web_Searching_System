@@ -160,10 +160,7 @@
       box.innerHTML = emptyHtml('감사사례 데이터를 불러오지 못했습니다.', 'data/audit_cases.js 파일이 있는지 확인한 뒤 새로고침해 주세요. 감사자료원 탭은 계속 이용할 수 있습니다.');
       return;
     }
-    if (!state.synonymsLoaded) {
-      notice.hidden = false;
-      notice.textContent = '유의어 사전을 불러오지 못해 입력한 단어와 똑같은 표현만 찾습니다.';
-    } else notice.hidden = true;
+    notice.hidden = true;
 
     var res = S.search(state.cases, state.query, state.dict, { filters: caseFilters(), sort: $('sortSelect').value });
     var rows = res.rows, terms = S.highlightTerms(res.parsed);
@@ -171,16 +168,13 @@
     var label = state.query ? '‘' + state.query + '’ 관련 ' : (anyCaseFilter() ? '조건에 맞는 감사사례 ' : '전체 감사사례 ');
     $('resultSummary').textContent = label + rows.length + '건';
 
-    // 검색어를 어떻게 해석했는지 알려줌 (한영 변환, 조사 제거, 초성, 유의어)
+    // 검색어를 어떻게 해석했는지 알려줌 (한영 변환, 조사 제거, 초성)
     var notes = [];
     if (res.converted) notes.push('한글 자판으로 바꿔 ‘' + res.usedQuery + '’(으)로 검색했습니다');
     res.parsed.tokens.forEach(function (t) {
       if (t.original) notes.push('‘' + t.original + '’ → ‘' + t.text + '’');
       if (t.chosung) notes.push('‘' + t.text + '’ 초성으로 검색');
     });
-    var syn = [];
-    res.parsed.tokens.forEach(function (t) { syn = syn.concat(t.synonyms); });
-    if (syn.length) notes.push('함께 찾은 표현: ' + syn.slice(0, 10).join(', ') + (syn.length > 10 ? ' 외 ' + (syn.length - 10) + '개' : ''));
     $('expansionNotice').textContent = notes.join(' · ');
 
     if (!rows.length) {
@@ -218,8 +212,7 @@
     var why = '';
     if (whyOverride) why = whyOverride;
     else if (state.query) {
-      why = r.direct.length ? '직접 일치' : '관련 표현 일치';
-      if (!r.direct.length && r.synonyms.length) why += ' · ' + r.synonyms.slice(0, 3).join(', ');
+      why = '직접 일치';
     }
     var link = x.source_url_scope === 'board'
       ? '<a class="source-link" href="' + esc(safeUrl(x.source_url)) + '" target="_blank" rel="noopener noreferrer">공식 게시판 보기 <span aria-hidden="true">↗</span></a>'

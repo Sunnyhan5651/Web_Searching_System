@@ -2,21 +2,17 @@
  * 감사사례 연찬 도우미 — 검색 엔진 (v2.2)
  * 화면(app.js)과 자동시험(tests/*.mjs)이 같은 코드를 씁니다.
  *
- * 점수 원칙 (인계서 9장)
+ * 점수 원칙
  *   1) 검색어 직접 일치 = 항목 가중치 × 3   (가장 높음)
- *   2) 유의어 일치     = 항목 가중치 × 1   (직접 일치보다 낮음)
- *   3) 한 항목에서는 둘 중 높은 점수 하나만 인정 (점수 부풀림 방지)
- *   4) 검색어가 여러 단어면 모든 단어가 어딘가에 일치해야 결과로 표시
- *   5) 일반어(관리·정산·하자 등)는 유의어로 확장하지 않음
- *   6) 유의어 확장은 검색어가 그룹의 '대표어'와 정확히 같을 때만 일어남
+ *   2) 검색어가 여러 단어면 모든 단어가 어딘가에 일치해야 결과로 표시
  *
  * v2.2 한글 검색 보강 (es-hangul 라이브러리 사용, 사이트 안에 포함되어 외부 호출 없음)
- *   7) 조사 처리      '계약을', '지하수는' → '계약', '지하수'
- *   8) 초성 검색      'ㅈㅎㅅ' → 지하수
- *   9) 한영 전환 실수  'rPdir' → '계약' (결과가 없을 때만 자동 변환하고 화면에 알림)
- *  10) 오타 제안      '게약' → "‘계약’을 찾으셨나요?" (자동으로 바꾸지 않고 제안만)
- *  11) 일부 단어 일치  모든 단어가 들어간 사례가 없으면 0건으로 두고,
- *                    '일부 단어만 들어간 사례'는 별도로 안내 (억지로 결과에 섞지 않음)
+ *   3) 조사 처리      ‘계약을’, ‘지하수는’ → ‘계약’, ‘지하수’
+ *   4) 초성 검색      ‘ㅈㅎㅅ’ → 지하수
+ *   5) 한영 전환 실수  ‘rPdir’ → ‘계약’ (결과가 없을 때만 자동 변환하고 화면에 알림)
+ *   6) 오타 제안      ‘게약’ → "’계약’을 찾으셨나요?" (자동으로 바꾸지 않고 제안만)
+ *   7) 일부 단어 일치  모든 단어가 들어간 사례가 없으면 0건으로 두고,
+ *                    ‘일부 단어만 들어간 사례’는 별도로 안내 (억지로 결과에 섞지 않음)
  */
 (function (root, factory) {
   var H = null;
@@ -38,7 +34,7 @@
   ];
   // 초성 검색은 내용 항목에만 적용 (기관명·처분까지 넣으면 엉뚱한 일치가 많아짐)
   var CHOSUNG_FIELDS = { title: true, summary: true, category: true, menu_name: true, audit_org: true, recommended_keywords: true };
-  var DIRECT = 3, SYNONYM = 1;
+  var DIRECT = 3;
 
   function normalize(v) { return String(v == null ? '' : v).toLowerCase().replace(/\s+/g, ' ').trim(); }
   function compact(v) { return normalize(v).replace(/\s+/g, ''); }
@@ -146,12 +142,7 @@
       var original = null;
       var stem = stripJosa(w, dict);
       if (stem) { original = w; w = stem; c = stem; }
-      var syn = [];
-      ((dict && dict.triggers[c]) || []).forEach(function (t) {
-        var tc = compact(t);
-        if (tc && tc !== c && syn.indexOf(t) === -1) syn.push(t);
-      });
-      tokens.push({ text: w, norm: normalize(w), key: c, original: original, synonyms: syn, synonymTerms: syn.map(makeTerm) });
+      tokens.push({ text: w, norm: normalize(w), key: c, original: original, synonyms: [], synonymTerms: [] });
     });
     return { raw: q, tokens: tokens };
   }
@@ -186,14 +177,6 @@
         if (contains(text, tok)) {
           best = w * DIRECT;
           if (direct.indexOf(tok.text) === -1) direct.push(tok.text);
-        } else {
-          for (var s = 0; s < tok.synonymTerms.length; s++) {
-            if (contains(text, tok.synonymTerms[s])) {
-              best = w * SYNONYM;
-              if (synHits.indexOf(tok.synonyms[s]) === -1) synHits.push(tok.synonyms[s]);
-              break;
-            }
-          }
         }
         tokScore += best;
       }
@@ -397,7 +380,7 @@
   }
   function highlightTerms(parsed) {
     var t = [];
-    parsed.tokens.forEach(function (tok) { if (!tok.chosung) { t.push(tok.text); t = t.concat(tok.synonyms); } });
+    parsed.tokens.forEach(function (tok) { if (!tok.chosung) t.push(tok.text); });
     return t;
   }
 
