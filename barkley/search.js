@@ -90,13 +90,8 @@
       // 한 음절짜리 토큰('외', '이', '가' 등)은 거의 모든 문서에 등장해 오검색을 유발
       if (!c || c.length < 2 || seen[c]) return;
       seen[c] = true;
-      var syn = [];
-      var list = (dict && dict.triggers[c]) || [];
-      list.forEach(function (t) {
-        var tc = compact(t);
-        if (tc && tc !== c && syn.indexOf(t) === -1) syn.push(t);
-      });
-      tokens.push({ text: w, norm: normalize(w), key: c, synonyms: syn, synonymTerms: syn.map(makeTerm) });
+      // 유의어 확장 비활성화: 검색어가 직접 포함된 결과만 반환
+      tokens.push({ text: w, norm: normalize(w), key: c, synonyms: [], synonymTerms: [] });
     });
     return { raw: q, tokens: tokens };
   }

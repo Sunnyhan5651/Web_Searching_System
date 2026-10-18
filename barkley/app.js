@@ -152,19 +152,14 @@
       box.innerHTML = emptyHtml('감사사례 데이터를 불러오지 못했습니다.', 'data/audit_cases.js 파일이 있는지 확인한 뒤 새로고침해 주세요. 감사자료원 탭은 계속 이용할 수 있습니다.');
       return;
     }
-    if (!state.synonymsLoaded) {
-      notice.hidden = false;
-      notice.textContent = '유의어 사전을 불러오지 못해 입력한 단어와 똑같은 표현만 찾습니다.';
-    } else notice.hidden = true;
+    notice.hidden = true;
 
-    var res = S.searchCases(state.cases, state.query, state.dict, { filters: caseFilters(), sort: $('sortSelect').value });
+    var res = S.searchCases(state.cases, state.query, state.dict, { filters: caseFilters(), sort: $(‘sortSelect’).value });
     var rows = res.rows;
 
-    var label = state.query ? '‘' + state.query + '’ 관련 ' : (anyCaseFilter() ? '조건에 맞는 감사사례 ' : '전체 감사사례 ');
-    $('resultSummary').textContent = label + rows.length + '건';
-    var syn = [];
-    res.parsed.tokens.forEach(function (t) { syn = syn.concat(t.synonyms); });
-    $('expansionNotice').textContent = syn.length ? '함께 찾은 표현: ' + syn.slice(0, 10).join(', ') + (syn.length > 10 ? ' 외 ' + (syn.length - 10) + '개' : '') : '';
+    var label = state.query ? ‘’’ + state.query + ‘’ 관련 ‘ : (anyCaseFilter() ? ‘조건에 맞는 감사사례 ‘ : ‘전체 감사사례 ‘);
+    $(‘resultSummary’).textContent = label + rows.length + ‘건’;
+    $(‘expansionNotice’).textContent = ‘’;
 
     if (!rows.length) {
       box.innerHTML = emptyHtml('현재 수록된 사례에는 검색결과가 없습니다.',
